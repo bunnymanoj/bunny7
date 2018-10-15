@@ -1,0 +1,391 @@
+ installed.packages("plyr")
+ library(plyr)
+ install.packages("corrplot")
+ library(corrplot)
+ installed.packages("ggplot2")
+ library(ggplot2)
+ install.packages("gridExtra")
+ library(gridExtra)
+ install.packages("ggthemes")
+ library(ggthemes)
+ install.packages("caret")
+ library(caret)
+ install.packages("randomForest")
+ library(randomForest)
+ install.packages("party")
+ library(party)
+ churn <- read.csv("Telco-Customer-Churn.csv",TRUE,",")
+ str(churn)
+ sapply(churn, function(x) sum(is.na(x)))
+ churn <- churn[complete.cases(churn), ]
+ numeric.var <- sapply(churn, is.numeric)
+ corr.matrix <- cor(churn[,numeric.var])
+ corrplot(corr.matrix, main="\n\nCorrelation Plot for Numerical Variables", method="number")
+ churn$TotalCharges <- NULL
+ p1 <- ggplot(churn, aes(x=gender)) + ggtitle("Gender") + xlab("Gender") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p1
+ p2 <- ggplot(churn, aes(x=SeniorCitizen)) + ggtitle("Senior Citizen") + xlab("Senior Citizen") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p2
+ p3 <- ggplot(churn, aes(x=Partner)) + ggtitle("Partner") + xlab("Partner") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p3
+ p4 <- ggplot(churn, aes(x=Dependents)) + ggtitle("Dependents") + xlab("Dependents") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ grid.arrange(p1, p2, p3, p4, ncol=2)
+ p5 <- ggplot(churn, aes(x=PhoneService)) + ggtitle("Phone Service") + xlab("Phone Service") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p5
+ p6 <- ggplot(churn, aes(x=MultipleLines)) + ggtitle("Multiple Lines") + xlab("Multiple Lines") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p6
+ p7 <- ggplot(churn, aes(x=InternetService)) + ggtitle("Internet Service") + xlab("Internet Service") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p7
+ p8 <- ggplot(churn, aes(x=OnlineSecurity)) + ggtitle("Online Security") + xlab("Online Security") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p8
+ grid.arrange(p5, p6, p7, p8, ncol=2)
+ p9 <- ggplot(churn, aes(x=OnlineBackup)) + ggtitle("Online Backup") + xlab("Online Backup") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p10 <- ggplot(churn, aes(x=DeviceProtection)) + ggtitle("Device Protection") + xlab("Device Protection") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p11 <- ggplot(churn, aes(x=TechSupport)) + ggtitle("Tech Support") + xlab("Tech Support") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p12 <- ggplot(churn, aes(x=StreamingTV)) + ggtitle("Streaming TV") + xlab("Streaming TV") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ grid.arrange(p9, p10, p11, p12, ncol=2)
+ p13 <- ggplot(churn, aes(x=StreamingMovies)) + ggtitle("Streaming Movies") + xlab("Streaming Movies") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p14 <- ggplot(churn, aes(x=Contract)) + ggtitle("Contract") + xlab("Contract") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p15 <- ggplot(churn, aes(x=PaperlessBilling)) + ggtitle("Paperless Billing") + xlab("Paperless Billing") + 
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p16 <- ggplot(churn, aes(x=PaymentMethod)) + ggtitle("Payment Method") + xlab("Payment Method") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ p17 <- ggplot(churn, aes(x=tenure_group)) + ggtitle("Tenure Group") + xlab("Tenure Group") +
+  geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
+ grid.arrange(p13, p14, p15, p16, ncol=2)
+ intrain<- createDataPartition(churn$Churn,p=0.7,list=FALSE)
+ set.seed(2017)
+ training<- churn[intrain,]
+ testing<- churn[-intrain,]
+ dim(training); dim(testing)
+ LogModel <- glm(Churn ~ .,family=binomial(link="logit"),data=training)
+ print(summary(LogModel))
+ Call:
+glm(formula = Churn ~ ., family = binomial(link = "logit"), data = testing)
+
+Deviance Residuals: 
+   [1]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+  [37]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+  [73]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [109]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [145]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [181]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [217]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [253]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [289]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [325]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [361]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [397]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [433]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [469]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [505]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [541]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [577]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [613]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [649]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [685]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [721]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [757]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [793]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [829]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [865]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [901]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [937]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [973]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [ reached getOption("max.print") -- omitted 1108 entries ]
+ Coefficients: (29 not defined because of singularities)
+                                       Estimate Std. Error z value Pr(>|z|)
+ (Intercept)                          -2.657e+01  3.561e+05       0        1
+ customerID0011-IGKFF                  5.313e+01  5.036e+05       0        1
+ customerID0013-MHZWF                 -2.246e-12  5.036e+05       0        1
+ customerID0014-BMAQU                 -2.385e-12  5.036e+05       0        1
+ customerID0016-QLJIS                 -2.281e-12  5.036e+05       0        1
+ customerID0017-IUDMW                 -2.456e-12  5.036e+05       0        1
+ customerID0020-JDNXP                 -2.316e-12  5.036e+05       0        1
+ customerID0023-UYUPN                 -2.482e-12  5.036e+05       0        1
+ customerID0040-HALCW                 -2.261e-12  5.036e+05       0        1
+ customerID0052-DCKON                 -2.714e-12  5.036e+05       0        1
+ customerID0068-FIGTF                 -2.100e-12  5.036e+05       0        1
+ customerID0074-HDKDG                 -2.270e-12  5.036e+05       0        1
+ customerID0083-PIVIK                 -2.412e-12  5.036e+05       0        1
+ customerID0089-IIQKO                 -2.452e-12  5.036e+05       0        1
+ customerID0094-OIFMO                  5.313e+01  5.036e+05       0        1
+ customerID0096-BXERS                 -2.354e-12  5.036e+05       0        1
+ customerID0096-FCPUF                 -2.360e-12  5.036e+05       0        1
+ customerID0104-PPXDV                 -2.321e-12  5.036e+05       0        1
+ customerID0107-YHINA                  5.313e+01  5.036e+05       0        1
+ customerID0112-QWPNC                  5.313e+01  5.036e+05       0        1
+ customerID0114-PEGZZ                  2.620e-12  5.036e+05       0        1
+ customerID0117-LFRMW                  5.313e+01  5.036e+05       0        1
+ customerID0121-SNYRK                 -2.288e-12  5.036e+05       0        1
+ customerID0123-CRBRT                 -2.326e-12  5.036e+05       0        1
+ customerID0125-LZQXK                  5.313e+01  5.036e+05       0        1
+ customerID0133-BMFZO                  5.313e+01  5.036e+05       0        1
+ customerID0134-XWXCE                 -2.436e-12  5.036e+05       0        1
+ customerID0141-YEAYS                 -2.219e-12  5.036e+05       0        1
+ customerID0142-GVYSN                 -2.145e-12  5.036e+05       0        1
+ customerID0177-PXBAT                 -2.380e-12  5.036e+05       0        1
+ customerID0187-WZNAB                  3.481e-12  5.036e+05       0        1
+ customerID0188-GWFLE                 -2.408e-12  5.036e+05       0        1
+ customerID0193-ESZXP                  5.313e+01  5.036e+05       0        1
+ customerID0195-IESCP                  5.313e+01  5.036e+05       0        1
+ customerID0196-JTUQI                 -2.304e-12  5.036e+05       0        1
+ customerID0201-OAMXR                  5.313e+01  5.036e+05       0        1
+ customerID0206-TBWLC                 -2.354e-12  5.036e+05       0        1
+ customerID0208-BPQEJ                 -2.433e-12  5.036e+05       0        1
+ customerID0218-QNVAS                 -2.259e-12  5.036e+05       0        1
+ customerID0219-YTZUE                  5.313e+01  5.036e+05       0        1
+ customerID0221-WMXNQ                 -2.316e-12  5.036e+05       0        1
+ customerID0222-CNVPT                 -2.468e-12  5.036e+05       0        1
+ customerID0224-HJAPT                  5.313e+01  5.036e+05       0        1
+ customerID0224-NIJLP                 -2.523e-12  5.036e+05       0        1
+ customerID0224-RLWWD                 -2.418e-12  5.036e+05       0        1
+ customerID0229-LFJAF                 -4.410e-12  5.036e+05       0        1
+ customerID0230-UBYPQ                 -2.897e-12  5.036e+05       0        1
+ customerID0235-KGSLC                  5.313e+01  5.036e+05       0        1
+ customerID0247-SLUJI                 -2.391e-12  5.036e+05       0        1
+ customerID0260-ZDLGK                  5.313e+01  5.036e+05       0        1
+ customerID0263-FJTQO                 -2.379e-12  5.036e+05       0        1
+ customerID0264-CNITK                 -2.313e-12  5.036e+05       0        1
+ customerID0265-PSUAE                 -2.341e-12  5.036e+05       0        1
+ customerID0270-THENM                 -2.149e-12  5.036e+05       0        1
+ customerID0278-YXOOG                  5.313e+01  5.036e+05       0        1
+ customerID0301-KOBTQ                 -2.434e-12  5.036e+05       0        1
+ customerID0305-SQECB                 -2.674e-12  5.036e+05       0        1
+ customerID0306-JAELE                  5.313e+01  5.036e+05       0        1
+ customerID0307-BCOPK                 -2.738e-12  5.036e+05       0        1
+ customerID0310-VQXAM                 -2.352e-12  5.036e+05       0        1
+ customerID0311-QYWSS                 -3.442e-14  5.036e+05       0        1
+ customerID0320-JDNQG                  5.313e+01  5.036e+05       0        1
+ customerID0322-CHQRU                  5.313e+01  5.036e+05       0        1
+ customerID0327-WFZSY                  9.810e-12  5.036e+05       0        1
+ customerID0330-IVZHA                  5.313e+01  5.036e+05       0        1
+ customerID0334-GDDSO                  5.313e+01  5.036e+05       0        1
+ customerID0334-ZFJSR                 -2.386e-12  5.036e+05       0        1
+ customerID0336-PIKEI                 -2.353e-12  5.036e+05       0        1
+ customerID0354-WYROK                  5.313e+01  5.036e+05       0        1
+ customerID0356-ERHVT                 -2.871e-12  5.036e+05       0        1
+ customerID0362-RAOQO                 -2.435e-12  5.036e+05       0        1
+ customerID0365-TRTPY                 -2.440e-12  5.036e+05       0        1
+ customerID0373-AIVNJ                 -2.425e-12  5.036e+05       0        1
+ customerID0376-OIWME                 -1.221e-11  5.036e+05       0        1
+ customerID0377-JBKKT                 -2.428e-12  5.036e+05       0        1
+ customerID0378-TOVMS                  5.313e+01  5.036e+05       0        1
+ customerID0386-CWRGM                 -2.389e-12  5.036e+05       0        1
+ customerID0388-EOPEX                  5.313e+01  5.036e+05       0        1
+ customerID0396-HUJBP                  1.943e-12  5.036e+05       0        1
+ customerID0407-BDJKB                  5.313e+01  5.036e+05       0        1
+ customerID0410-IPFTY                 -2.406e-12  5.036e+05       0        1
+ customerID0411-EZJZE                 -2.413e-12  5.036e+05       0        1
+ customerID0412-UCCNP                 -2.382e-12  5.036e+05       0        1
+ customerID0420-TXVSG                 -2.208e-12  5.036e+05       0        1
+ customerID0422-OHQHQ                 -2.456e-12  5.036e+05       0        1
+ customerID0428-AXXLJ                  3.487e-12  5.036e+05       0        1
+ customerID0434-CSFON                 -2.259e-12  5.036e+05       0        1
+ customerID0436-TWFFZ                 -2.332e-12  5.036e+05       0        1
+ customerID0439-IFYUN                 -2.670e-12  5.036e+05       0        1
+ customerID0440-QEXBZ                 -1.044e-12  5.036e+05       0        1
+ customerID0440-UEDAI                 -6.912e-12  5.036e+05       0        1
+ customerID0442-TDYUO                 -2.601e-12  5.036e+05       0        1
+ customerID0447-RXSGD                 -1.387e-11  5.036e+05       0        1
+ customerID0463-TXOAK                 -2.289e-12  5.036e+05       0        1
+ customerID0463-WZZKO                 -2.472e-12  5.036e+05       0        1
+ customerID0463-ZSDNT                 -2.518e-12  5.036e+05       0        1
+ customerID0480-KYJVA                 -2.732e-12  5.036e+05       0        1
+ customerID0484-FFVBJ                 -2.324e-12  5.036e+05       0        1
+ customerID0488-GSLFR                  5.313e+01  5.036e+05       0        1
+ customerID0489-WMEMG                  6.662e-13  5.036e+05       0        1
+ customerID0508-SQWPL                  7.468e-12  5.036e+05       0        1
+ customerID0515-YPMCW                  5.313e+01  5.036e+05       0        1
+ customerID0516-OOHAR                 -1.821e-12  5.036e+05       0        1
+ customerID0516-VRYBW                  5.313e+01  5.036e+05       0        1
+ customerID0529-ONKER                  5.313e+01  5.036e+05       0        1
+ customerID0531-XBKMM                  7.215e-12  5.036e+05       0        1
+ customerID0533-BNWKF                  5.313e+01  5.036e+05       0        1
+ customerID0533-UCAAU                 -2.357e-12  5.036e+05       0        1
+ customerID0536-ACXIP                 -5.819e-12  5.036e+05       0        1
+ customerID0549-CYCQN                 -2.360e-12  5.036e+05       0        1
+ customerID0559-CKHUS                 -2.435e-12  5.036e+05       0        1
+ customerID0564-MUUQK                 -2.564e-12  5.036e+05       0        1
+ customerID0565-IYCGT                  5.313e+01  5.036e+05       0        1
+ customerID0565-JUPYD                 -2.532e-12  5.036e+05       0        1
+ customerID0568-ONFPC                  5.313e+01  5.036e+05       0        1
+ customerID0575-CUQOV                 -2.588e-12  5.036e+05       0        1
+ customerID0577-WHMEV                 -2.484e-12  5.036e+05       0        1
+ customerID0594-UFTUL                  2.003e-11  5.036e+05       0        1
+ customerID0599-XNYDO                 -2.498e-12  5.036e+05       0        1
+ customerID0603-OLQDC                 -2.233e-12  5.036e+05       0        1
+ customerID0607-MVMGC                  1.320e-11  5.036e+05       0        1
+ customerID0613-WUXUM                 -2.541e-12  5.036e+05       0        1
+ customerID0616-ATFGB                  5.313e+01  5.036e+05       0        1
+ customerID0617-AQNWT                  5.313e+01  5.036e+05       0        1
+ customerID0621-HJWXJ                 -2.408e-12  5.036e+05       0        1
+ customerID0623-GDISB                  7.642e-12  5.036e+05       0        1
+ customerID0625-AFOHS                 -2.678e-12  5.036e+05       0        1
+ customerID0626-QXNGV                 -2.489e-12  5.036e+05       0        1
+customerID0634-SZPQA                  5.313e+01  5.036e+05       0        1
+customerID0640-YJTPY                 -2.416e-12  5.036e+05       0        1
+customerID0654-PQKDW                 -2.491e-12  5.036e+05       0        1
+customerID0657-DOGUM                 -1.159e-11  5.036e+05       0        1
+customerID0665-XHDJU                 -2.182e-12  5.036e+05       0        1
+customerID0668-OGMHD                 -2.540e-12  5.036e+05       0        1
+customerID0670-ANMUU                 -6.464e-12  5.036e+05       0        1
+customerID0673-IGUQO                  4.598e-12  5.036e+05       0        1
+customerID0674-DGMAQ                 -2.361e-12  5.036e+05       0        1
+customerID0674-EYYZV                 -2.286e-12  5.036e+05       0        1
+customerID0674-GCDXG                 -2.517e-12  5.036e+05       0        1
+customerID0689-DSXGL                 -2.443e-12  5.036e+05       0        1
+customerID0690-SRQID                 -2.367e-12  5.036e+05       0        1
+customerID0696-UKTOX                 -2.429e-12  5.036e+05       0        1
+customerID0697-ZMSWS                  5.313e+01  5.036e+05       0        1
+customerID0699-NDKJM                 -1.248e-12  5.036e+05       0        1
+customerID0701-RFGFI                 -2.428e-12  5.036e+05       0        1
+customerID0704-VCUMB                 -6.208e-12  5.036e+05       0        1
+customerID0723-FDLAY                 -2.422e-12  5.036e+05       0        1
+customerID0723-VSOBE                 -2.387e-12  5.036e+05       0        1
+customerID0727-BMPLR                  5.313e+01  5.036e+05       0        1
+customerID0727-IWKVK                  5.313e+01  5.036e+05       0        1
+customerID0730-BGQGF                 -2.539e-12  5.036e+05       0        1
+customerID0730-KOAVE                 -4.821e-12  5.036e+05       0        1
+customerID0731-EBJQB                 -1.112e-12  5.036e+05       0        1
+customerID0734-OXWBT                 -2.398e-12  5.036e+05       0        1
+customerID0743-HNPFG                 -2.332e-12  5.036e+05       0        1
+customerID0743-HRVFF                 -2.345e-12  5.036e+05       0        1
+customerID0744-BIKKF                 -2.315e-12  5.036e+05       0        1
+customerID0746-JTRFU                  5.313e+01  5.036e+05       0        1
+customerID0748-RDGGM                  5.313e+01  5.036e+05       0        1
+customerID0756-MPZRL                 -2.625e-12  5.036e+05       0        1
+customerID0757-WCUUZ                 -4.665e-12  5.036e+05       0        1
+customerID0774-IFUVM                 -2.410e-12  5.036e+05       0        1
+customerID0774-RMNUW                 -2.910e-12  5.036e+05       0        1
+customerID0778-NELLA                  5.313e+01  5.036e+05       0        1
+customerID0781-LKXBR                  5.313e+01  5.036e+05       0        1
+customerID0784-ZQJZX                 -2.395e-12  5.036e+05       0        1
+customerID0786-IVLAW                 -2.498e-12  5.036e+05       0        1
+customerID0786-VSSUD                  5.313e+01  5.036e+05       0        1
+customerID0795-LAFGP                 -2.183e-12  5.036e+05       0        1
+customerID0795-XCCTE                 -2.295e-12  5.036e+05       0        1
+customerID0810-BDHAW                  2.467e-11  5.036e+05       0        1
+customerID0816-TSPHQ                 -7.650e-12  5.036e+05       0        1
+customerID0817-HSUSE                 -2.424e-12  5.036e+05       0        1
+customerID0818-OCPZO                  5.313e+01  5.036e+05       0        1
+customerID0822-GAVAP                  5.313e+01  5.036e+05       0        1
+customerID0823-HSCDJ                  5.313e+01  5.036e+05       0        1
+customerID0827-ITJPH                 -2.167e-12  5.036e+05       0        1
+customerID0831-JNISG                 -2.400e-12  5.036e+05       0        1
+customerID0835-DUUIQ                 -2.402e-12  5.036e+05       0        1
+customerID0836-SEYLU                  5.313e+01  5.036e+05       0        1
+customerID0839-JTCUD                 -2.460e-12  5.036e+05       0        1
+customerID0841-NULXI                  5.313e+01  5.036e+05       0        1
+customerID0847-HGRML                 -2.422e-12  5.036e+05       0        1
+customerID0848-SOMKO                 -2.190e-12  5.036e+05       0        1
+customerID0851-DFJKB                 -2.375e-12  5.036e+05       0        1
+customerID0853-TWRVK                 -7.093e-12  5.036e+05       0        1
+customerID0866-QLSIR                  5.313e+01  5.036e+05       0        1
+customerID0869-PAPRP                 -2.457e-12  5.036e+05       0        1
+customerID0870-VEMYL                  5.313e+01  5.036e+05       0        1
+customerID0871-URUWO                  5.313e+01  5.036e+05       0        1
+customerID0872-CASZJ                  1.571e-11  5.036e+05       0        1
+customerID0877-SDMBN                  5.313e+01  5.036e+05       0        1
+customerID0880-FVFWF                 -2.389e-12  5.036e+05       0        1
+customerID0883-EIBTI                  5.313e+01  5.036e+05       0        1
+customerID0898-XCGTF                 -2.512e-12  5.036e+05       0        1
+customerID0902-RFHOF                 -2.673e-12  5.036e+05       0        1
+customerID0907-HQNTS                  8.759e-12  5.036e+05       0        1
+customerID0916-KNFAJ                 -2.506e-12  5.036e+05       0        1
+customerID0925-VYDLG                  5.313e+01  5.036e+05       0        1
+customerID0927-CNGRH                 -2.678e-12  5.036e+05       0        1
+customerID0927-LCSMG                  5.313e+01  5.036e+05       0        1
+customerID0928-JMXNP                 -2.396e-12  5.036e+05       0        1
+customerID0929-PECLO                 -2.146e-12  5.036e+05       0        1
+customerID0931-MHTEM                 -2.288e-12  5.036e+05       0        1
+customerID0940-OUQEC                  5.313e+01  5.036e+05       0        1
+customerID0943-ZQPXH                 -2.564e-12  5.036e+05       0        1
+customerID0946-CLJTI                  5.313e+01  5.036e+05       0        1
+customerID0946-FKYTX                 -2.335e-12  5.036e+05       0        1
+customerID0969-RGKCU                 -2.433e-12  5.036e+05       0        1
+customerID0970-ETWGE                  5.313e+01  5.036e+05       0        1
+customerID0973-KYVNF                 -2.408e-12  5.036e+05       0        1
+customerID0975-VOOVL                 -2.341e-12  5.036e+05       0        1
+customerID0979-MOZQI                 -2.437e-12  5.036e+05       0        1
+customerID0983-TATYJ                 -2.541e-12  5.036e+05       0        1
+customerID0997-YTLNY                 -2.666e-12  5.036e+05       0        1
+customerID1013-QCWAM                 -2.313e-12  5.036e+05       0        1
+customerID1015-JPFYW                 -2.476e-12  5.036e+05       0        1
+customerID1017-FBQMM                  1.147e-11  5.036e+05       0        1
+customerID1020-JPQOW                 -2.429e-12  5.036e+05       0        1
+customerID1022-RKXDR                 -2.434e-12  5.036e+05       0        1
+customerID1024-KPRBB                 -2.241e-12  5.036e+05       0        1
+customerID1025-FALIX                 -2.136e-12  5.036e+05       0        1
+customerID1036-GUDCL                 -2.627e-12  5.036e+05       0        1
+customerID1043-YCUTE                  5.313e+01  5.036e+05       0        1
+customerID1047-RNXZV                 -6.554e-12  5.036e+05       0        1
+customerID1052-QJIBV                 -2.281e-12  5.036e+05       0        1
+customerID1061-PNTHC                 -2.441e-12  5.036e+05       0        1
+customerID1063-DHQJF                 -2.530e-12  5.036e+05       0        1
+customerID1074-WVEVG                 -1.457e-12  5.036e+05       0        1
+customerID1075-BGWOH                  5.313e+01  5.036e+05       0        1
+customerID1084-MNSMJ                 -2.417e-12  5.036e+05       0        1
+customerID1085-LDWAM                 -2.496e-12  5.036e+05       0        1
+customerID1086-LXKFY                  5.313e+01  5.036e+05       0        1
+customerID1091-SOZGA                 -2.467e-12  5.036e+05       0        1
+customerID1116-DXXDF                 -2.670e-12  5.036e+05       0        1
+customerID1120-BMWUB                  5.313e+01  5.036e+05       0        1
+customerID1121-QSIVB                  4.691e-12  5.036e+05       0        1
+customerID1131-ALZWV                 -1.377e-11  5.036e+05       0        1
+customerID1137-DGOWI                 -2.377e-12  5.036e+05       0        1
+customerID1140-UKVZG                 -2.332e-12  5.036e+05       0        1
+customerID1143-NMNQJ                  5.313e+01  5.036e+05       0        1
+customerID1150-WFARN                  5.313e+01  5.036e+05       0        1
+customerID1162-ECVII                 -2.543e-12  5.036e+05       0        1
+customerID1167-OYZJF                 -2.369e-12  5.036e+05       0        1
+customerID1169-SAOCL                 -2.500e-12  5.036e+05       0        1
+customerID1169-WCVAK                 -2.564e-12  5.036e+05       0        1
+customerID1170-SASML                  1.426e-11  5.036e+05       0        1
+customerID1171-TYKUR                 -2.458e-12  5.036e+05       0        1
+customerID1173-NOEYG                  1.074e-11  5.036e+05       0        1
+customerID1177-XZBJL                 -2.260e-12  5.036e+05       0        1
+ [ reached getOption("max.print") -- omitted 1887 rows ]
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2.4406e+03  on 2107  degrees of freedom
+Residual deviance: 1.2230e-08  on    0  degrees of freedom
+AIC: 4216
+
+Number of Fisher Scoring iterations: 25
+ testing$Churn <- as.character(testing$Churn)
+ testing$Churn[testing$Churn=="No"] <- "0"
+ testing$Churn[testing$Churn=="Yes"] <- "1"
+ fitted.results <- predict(LogModel,newdata=testing,type='response')
+ fitted.results <- ifelse(fitted.results > 0.5,1,0)
+ misClasificError <- mean(fitted.results != testing$Churn)
+ print(paste('Logistic Regression Accuracy',1-misClasificError)
+ print("Confusion Matrix for Logistic Regression");
+ table(testing$Churn, fitted.results > 0.5)
+ FALSE TRUE
+  0  1548    0
+  1     0  560
+
+
+
+
+
+
+
+
+
